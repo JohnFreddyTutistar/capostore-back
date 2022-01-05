@@ -1,16 +1,37 @@
-require('./config/config');
-
 const express = require('express');
-const app = express();
-const bodyParser = require('body-parser');
+const cors = require('cors');
+const {userRoutes} = require('./routes/usuario');
 
-app.use(bodyParser.urlencoded({extended:false}));
-app.use(bodyParser.json());
+class Server{
+    app;
+    port;
+    apiRoutes = {
+        usuarios: '/api/usuarios'
+    }
 
-app.get('/tienda',(req, res) => {
-    res.send('api ok');
-});
+    constructor(){
+        this.app = express();
+        this.port = process.env.PORT || '3000';
+        this.middlewares();
+        this.routes();
+    }
 
-app.listen(process.env.PORT, ()=> {
-    console.log('Escuchando en el puerto', process.env.PORT);
-})
+    routes(){
+        this.app.use(this.apiRoutes.usuarios, userRoutes);
+    }
+
+    listen(){
+        this.app.listen(this.port, ()=>{
+            console.log(`servidor corriendo en el puerto ${this.port}`);
+        });
+    }
+
+    middlewares(){
+        this.app.use(express.json());
+        this.app.use(cors());
+    }
+}
+
+module.exports = {
+    Server
+}
